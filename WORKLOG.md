@@ -87,6 +87,17 @@ Companion: `REPORT.md` (claim-by-claim status). Plans live in `../SweetGingerDes
 - Re-ran the unit suite after the interface change -> `npx vitest run` -> `Tests 32 passed (32)`
 - Attempted the Vercel deploy -> `Get-Command vercel` + `Env:VERCEL*` + three auth.json paths -> no CLI, no token, no session: `BLOCKED`, see `REPORT.md`
 
+## Post-build — pushed to GitHub (26 Sep)
+
+- Checked the target before touching it -> `gh repo view somascloudworld-coder/sweergingerdesignstudio --json ...` -> `{"isEmpty":true,"visibility":"PUBLIC","defaultBranchRef":{"name":""}}`; the correctly-spelled `sweetgingerdesignstudio` does not exist
+- Checked push auth without mutating anything -> `git ls-remote https://github.com/.../sweergingerdesignstudio` -> `exit=0`, no refs (empty repo)
+- Made the app its own repo rather than pushing the whole starter folder (which holds `order-desk/`, the digest agent and unrelated docs) -> `git init -b main` -> `Initialized empty Git repository`
+- Scanned the staged tree before committing -> `git diff --cached --name-only | Select-String '\.env\.local|^\.data/|node_modules|\.next/'` -> no matches; 66 files staged
+- Scanned staged content for secret-shaped strings -> `Select-String 'sb_secret_|sb_publishable_...|sk-...|PRIVATE KEY|gho_...'` -> two hits, both benign (the `.env.example` placeholder comment, and my own leak-scan patterns in `scripts/verify.mjs`)
+- Committed and pushed -> `git commit` + `git push -u origin main` -> `cb23699`, `* [new branch] main -> main`, `push exit=0`
+- Verified the push from the remote side, not just the CLI -> `git ls-remote origin main` -> `cb236998b9d910a4d20fbc1b9e0fb04970e05b37` equals local HEAD; `gh repo view` -> `"isEmpty":false`, `"defaultBranchRef":{"name":"main"}`
+- Verified the live content and that the env file did not go up -> `Invoke-WebRequest raw.githubusercontent.com/.../main/README.md` -> `STATUS: 200`; `.../main/.env.local` -> `absent (status 404)`
+
 ## Gates and walls
 
 - Real garment photography (plan step 2) -> not supplied -> generated labelled placeholder art, `UNVERIFIED` as real photography

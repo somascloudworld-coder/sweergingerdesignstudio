@@ -92,6 +92,17 @@ Step 14 — status workflow, staff-gated: DONE
 Step 15 — real phone, both hands: BLOCKED (no physical device; and the preview judgement needs a person)
 Step 16 — owner acceptance: BLOCKED (needs Shankar or a delegate)
 
+### Published source
+
+Pushed to `https://github.com/somascloudworld-coder/sweergingerdesignstudio`: DONE
+  evidence: `git push -u origin main` -> `* [new branch] main -> main`, `push exit=0`, commit `cb23699`
+  evidence: `git ls-remote origin main` -> `cb236998b9d910a4d20fbc1b9e0fb04970e05b37` equals local `HEAD`
+  evidence: `gh repo view ... --json isEmpty,defaultBranchRef` -> `"isEmpty":false`, `"defaultBranchRef":{"name":"main"}`
+  evidence: `Invoke-WebRequest raw.githubusercontent.com/.../main/README.md` -> `STATUS: 200`
+  scope: the app was pushed as its own repository (66 files). The surrounding starter folder — `order-desk/`, the digest agent, the shared `REPORT.md`/`WORKLOG.md` — was deliberately not pushed, since the repository is named for this app.
+  check: `.env.local` and `.data/` are gitignored and were not committed; `raw.githubusercontent.com/.../main/.env.local` -> `absent (status 404)`
+  note: the repository name is `sweergingerdesignstudio` (missing the "t" in "sweet"), which is the URL as given. It is public. Renaming is a one-click change in the repository settings; GitHub keeps a redirect from the old name.
+
 ### Production backend
 
 Supabase Postgres adapter and `supabase-setup.sql`: UNVERIFIED
@@ -159,6 +170,7 @@ Every claim with the command that proves it. Anything not run here is marked UNV
 - Whole browser suite green -> `node scripts/e2e.mjs` -> `ALL BROWSER CHECKS PASSED`, `PASS no client-side errors during the flow -> none`
 - Print files are written through the repository, not straight to disk -> `npm run verify:api` -> `PASS the print file downloads as a real PNG -> 15663 bytes` (local backend: `.data/print/...`). This is what makes the export path workable on a serverless host, where the filesystem is not writable.
 - Embroidery is never auto-digitized -> `npm run verify:api` -> `PASS an embroidery export is flagged for manual digitizing and keeps its intent -> flag true, intents 1`; `PASS the intent carries placement, size and colour but claims no stitch file`
+- Source is published on GitHub -> `git ls-remote origin main` -> `cb236998b9d910a4d20fbc1b9e0fb04970e05b37` == local `HEAD`; live README `STATUS: 200`; live `.env.local` -> `absent (status 404)`
 - Supabase backend works -> UNVERIFIED (no project provisioned; SQL not yet run)
 - Deployed to a public URL -> UNVERIFIED (not attempted; no host credentials)
 - Real garment photography in the picker -> UNVERIFIED (placeholder art)
