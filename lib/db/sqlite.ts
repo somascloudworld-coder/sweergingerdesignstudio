@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { getDataDir } from '../paths';
+import { ensureDataDir, getDataDir } from '../paths';
 import type {
   Design,
   DesignSides,
@@ -17,7 +17,7 @@ import type {
   Side,
 } from '../types';
 import { SCHEMA_SQL } from './schema';
-import { ensureGarmentImages, seedDatabase } from './seed';
+import { seedDatabase } from './seed';
 import type {
   AssetRecord,
   CreateAssetInput,
@@ -45,8 +45,7 @@ function newPublicId(prefix: string): string {
 
 export function getDb(): Database.Database {
   if (dbHandle) return dbHandle;
-  const dataDir = getDataDir();
-  fs.mkdirSync(dataDir, { recursive: true });
+  const dataDir = ensureDataDir();
   const handle = new Database(path.join(dataDir, 'studio.db'));
   handle.pragma('journal_mode = WAL');
   handle.pragma('foreign_keys = ON');
@@ -58,9 +57,7 @@ export function getDb(): Database.Database {
 async function ensureReady(): Promise<void> {
   if (!ready) {
     ready = (async () => {
-      const handle = getDb();
-      await ensureGarmentImages(getDataDir());
-      seedDatabase(handle);
+      seedDatabase(getDb());
     })();
   }
   return ready;

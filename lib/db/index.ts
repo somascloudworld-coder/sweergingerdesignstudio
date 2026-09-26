@@ -1,3 +1,4 @@
+import { SERVERLESS_LOCAL_BACKEND_MESSAGE, isServerlessRuntime } from '../paths';
 import type { Repo } from './repo';
 
 let cached: Promise<Repo> | null = null;
@@ -20,6 +21,11 @@ export function getRepo(): Promise<Repo> {
       if (activeBackend() === 'supabase') {
         const { createSupabaseRepo } = await import('./supabase');
         return createSupabaseRepo();
+      }
+      // Refuse clearly rather than crashing on a read-only file system: a local SQLite
+      // file cannot be the system of record on a serverless host.
+      if (isServerlessRuntime()) {
+        throw new Error(SERVERLESS_LOCAL_BACKEND_MESSAGE);
       }
       const { createSqliteRepo } = await import('./sqlite');
       return createSqliteRepo();

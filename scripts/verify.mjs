@@ -43,11 +43,21 @@ const areaCount = db.prepare('select count(*) c from print_areas').get().c;
 check('product_variants seeded', variantCount === 10, `${variantCount} variants`);
 check('print_areas seeded per product x side', areaCount === 2, `${areaCount} areas`);
 
-const garment = await fetch(`${BASE}/api/media/garments/classic-crew-tee--optic-white.png`);
+const garmentPath = db
+  .prepare("select image_path from product_variants where id = 'classic-crew-tee--optic-white'")
+  .get().image_path;
+const garment = await fetch(`${BASE}${garmentPath}`);
 check(
-  'garment image served from disk',
+  'garment art is served from public/ (not the writable-data folder)',
   garment.status === 200 && garment.headers.get('content-type') === 'image/png',
-  `${garment.status} ${garment.headers.get('content-type')}`,
+  `${garmentPath} -> ${garment.status} ${garment.headers.get('content-type')}`,
+);
+check(
+  'no product image depends on the local data folder',
+  !db
+    .prepare("select count(*) c from product_variants where image_path like '/api/media%'")
+    .get().c,
+  `${db.prepare("select count(*) c from product_variants where image_path like '/garments/%'").get().c} of ${variantCount} point at /garments/`,
 );
 
 // Scan every script the browser downloads for a server-side secret.

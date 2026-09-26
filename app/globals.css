@@ -313,6 +313,18 @@ hr {
   font-size: 13px;
 }
 
+.error-detail {
+  background: #fdeceb;
+  border: 1px solid #f0c2bd;
+  color: #7d2a18;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
 .notice-box {
   background: #fdf5e3;
   border: 1px solid #eeda9f;

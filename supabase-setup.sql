@@ -217,23 +217,23 @@ on conflict (id) do nothing;
 insert into public.products (id, slug, name, garment_type, base_price_paise, description, image_path) values
   ('prod_classic-crew-tee', 'classic-crew-tee', 'Classic Crew T-Shirt', 'crew', 49900,
    '180 GSM combed cotton crew neck. Unisex fit.',
-   '/api/media/garments/classic-crew-tee--optic-white.png'),
+   '/garments/classic-crew-tee--optic-white.png'),
   ('prod_oversized-tee', 'oversized-tee', 'Oversized T-Shirt', 'oversized', 59900,
    '240 GSM heavyweight cotton, dropped shoulder, boxy fit.',
-   '/api/media/garments/oversized-tee--optic-white.png')
+   '/garments/oversized-tee--optic-white.png')
 on conflict (id) do nothing;
 
 insert into public.product_variants (id, product_id, colour_name, colour_hex, image_path, sort) values
-  ('classic-crew-tee--optic-white', 'prod_classic-crew-tee', 'Optic White', '#f7f7f5', '/api/media/garments/classic-crew-tee--optic-white.png', 0),
-  ('classic-crew-tee--jet-black',   'prod_classic-crew-tee', 'Jet Black',   '#16181d', '/api/media/garments/classic-crew-tee--jet-black.png',   1),
-  ('classic-crew-tee--navy',        'prod_classic-crew-tee', 'Navy',        '#1e2a44', '/api/media/garments/classic-crew-tee--navy.png',        2),
-  ('classic-crew-tee--sand',        'prod_classic-crew-tee', 'Sand',        '#d8c6a5', '/api/media/garments/classic-crew-tee--sand.png',        3),
-  ('classic-crew-tee--sage',        'prod_classic-crew-tee', 'Sage',        '#a9b79b', '/api/media/garments/classic-crew-tee--sage.png',        4),
-  ('oversized-tee--optic-white',    'prod_oversized-tee',    'Optic White', '#f7f7f5', '/api/media/garments/oversized-tee--optic-white.png',    0),
-  ('oversized-tee--jet-black',      'prod_oversized-tee',    'Jet Black',   '#16181d', '/api/media/garments/oversized-tee--jet-black.png',      1),
-  ('oversized-tee--navy',           'prod_oversized-tee',    'Navy',        '#1e2a44', '/api/media/garments/oversized-tee--navy.png',           2),
-  ('oversized-tee--sand',           'prod_oversized-tee',    'Sand',        '#d8c6a5', '/api/media/garments/oversized-tee--sand.png',           3),
-  ('oversized-tee--sage',           'prod_oversized-tee',    'Sage',        '#a9b79b', '/api/media/garments/oversized-tee--sage.png',           4)
+  ('classic-crew-tee--optic-white', 'prod_classic-crew-tee', 'Optic White', '#f7f7f5', '/garments/classic-crew-tee--optic-white.png', 0),
+  ('classic-crew-tee--jet-black',   'prod_classic-crew-tee', 'Jet Black',   '#16181d', '/garments/classic-crew-tee--jet-black.png',   1),
+  ('classic-crew-tee--navy',        'prod_classic-crew-tee', 'Navy',        '#1e2a44', '/garments/classic-crew-tee--navy.png',        2),
+  ('classic-crew-tee--sand',        'prod_classic-crew-tee', 'Sand',        '#d8c6a5', '/garments/classic-crew-tee--sand.png',        3),
+  ('classic-crew-tee--sage',        'prod_classic-crew-tee', 'Sage',        '#a9b79b', '/garments/classic-crew-tee--sage.png',        4),
+  ('oversized-tee--optic-white',    'prod_oversized-tee',    'Optic White', '#f7f7f5', '/garments/oversized-tee--optic-white.png',    0),
+  ('oversized-tee--jet-black',      'prod_oversized-tee',    'Jet Black',   '#16181d', '/garments/oversized-tee--jet-black.png',      1),
+  ('oversized-tee--navy',           'prod_oversized-tee',    'Navy',        '#1e2a44', '/garments/oversized-tee--navy.png',           2),
+  ('oversized-tee--sand',           'prod_oversized-tee',    'Sand',        '#d8c6a5', '/garments/oversized-tee--sand.png',           3),
+  ('oversized-tee--sage',           'prod_oversized-tee',    'Sage',        '#a9b79b', '/garments/oversized-tee--sage.png',           4)
 on conflict (id) do nothing;
 
 -- PROVISIONAL: replace with Ginger Prints dimensions per garment x side (D4/C10).
@@ -264,8 +264,10 @@ on conflict (id) do nothing;
 
 -- ============================================================
 -- NOTE ON GARMENT IMAGES
--- The seeded image_path values point at the app's local /api/media route, which serves
--- the generated placeholder art from .data/garments when DATA_BACKEND=local. On
--- Supabase, upload real garment photography to the `studio` bucket (public or signed)
--- and set image_path to those URLs. Do not carry the placeholder art past step 2.
+-- The seeded image_path values point at /garments/*.png, which is generated into the
+-- app's public/ folder by scripts/build-garments.mjs (run automatically before dev and
+-- build) and served from the host's CDN. That keeps product art working on a deploy with
+-- no writable disk. It is PLACEHOLDER art: replace these files with real photography
+-- (same filenames), or upload to the `studio` bucket and update image_path. Do not carry
+-- placeholder art past step 2 of the implementation plan.
 -- ============================================================

@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "garments": "node scripts/build-garments.mjs",
+    "predev": "node scripts/build-garments.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/build-garments.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
