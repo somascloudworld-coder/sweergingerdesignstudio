@@ -19,6 +19,10 @@
 -- IMPORTANT (Step 2 of the implementation plan): the products below are seeded with
 -- PROVISIONAL print areas and placeholder garment art. Real garment photography and
 -- the real print-floor dimensions (D4) and price sheet (D3) must replace them.
+--
+-- THIS FILE ONLY INSERTS MISSING ROWS ("on conflict do nothing"). If your project was
+-- seeded before the garment paths moved to /garments/, re-running it changes nothing.
+-- Run supabase-repair-image-paths.sql instead to update rows that already exist.
 -- ============================================================
 
 -- ------------------------------------------------------------ schema
