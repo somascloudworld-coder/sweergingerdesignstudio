@@ -122,6 +122,18 @@ Reported by the owner after deploying: the page showed `Studio setup needed` wit
   still required from the owner: the Supabase project and its four environment variables
   (below). This fix removes the crash and the broken image paths; it does not create a
   database, because it cannot.
+  defect 3 fixed (reported again after deploy, with all variables set): the setup message
+  hardcoded the text `DATA_BACKEND=local`, so it could not prove what the deployment had
+  actually seen — a diagnostic that cannot be wrong is not a diagnostic. It now reports the
+  selected backend and why, each variable as present/MISSING (never a value), the runtime,
+  and the Vercel environment name.
+  evidence: simulated Preview deployment with nothing configured -> `curl /api/health` -> `"deploymentEnv":"preview"`, three `"present":false`, `"database":{"reachable":false}`; page -> `FOUND: environment           preview`, `FOUND: not Production`, `FOUND: Scope it to All Environments`
+  evidence: credentials present but backend pinned -> `DATA_BACKEND=local` + all three set -> page -> `FOUND: Every Supabase variable is present`, `FOUND: Change DATA_BACKEND to`
+  evidence: once switched -> `DATA_BACKEND=supabase` + unreachable host -> `curl /api/health` -> `"selected":"supabase"`, `"missing":[]`, `TypeError: fetch failed` (reaching for Supabase rather than refusing)
+  evidence: no key material leaks -> the page and `/api/health` were searched for the fake key strings used in the test -> absent
+  evidence: `npx vitest run` -> `Tests 43 passed (43)`; `node scripts/verify.mjs` -> `ALL CHECKS PASSED`; `node scripts/e2e.mjs` -> `ALL BROWSER CHECKS PASSED`
+  note: `.env.example` showed `DATA_BACKEND=local` without warning that a deployed host must
+  use `supabase`, which is the likely way the wrong value reached Vercel. It now says so first.
 
 ### Production backend
 

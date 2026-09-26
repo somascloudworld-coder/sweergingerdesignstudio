@@ -110,6 +110,18 @@ Companion: `REPORT.md` (claim-by-claim status). Plans live in `../SweetGingerDes
 - Regression-checked the restructure -> `npm run build` compiled; `npx tsc --noEmit` -> `TSC EXIT: 0`; `npx vitest run` -> `Tests 32 passed (32)`; `node scripts/verify.mjs` -> `ALL CHECKS PASSED`; `node scripts/e2e.mjs` -> `ALL BROWSER CHECKS PASSED`
 - Removed the now-invalid `eslint` key from `next.config.mjs` -> Next 16 warned `Unrecognized key(s) in object: 'eslint'`
 
+## Deploy fix 2 — the message that could not be trusted (26 Sep)
+
+- Owner reported the setup screen again, with all variables set in Vercel -> re-read the message I had written -> it hardcoded the string `DATA_BACKEND=local`, so it could not prove what the deployment had actually seen. That is a bad diagnostic, not just bad luck.
+- Replaced the hardcoded text with a real diagnosis (`lib/diagnostics.ts`) -> reports which backend was selected and *why*, each variable as present/MISSING (never a value), the runtime, and the Vercel environment name
+- Added `GET /api/health` -> returns the same diagnosis as JSON, probes the database live, and leaks no key material
+- Proved the diagnosis on a simulated **Preview** deployment with nothing configured -> `curl http://localhost:3100/api/health` -> `"deploymentEnv":"preview"`, all three `present:false`, `"database":{"reachable":false,...}`; the page then says `FOUND: environment           preview`, `FOUND: not Production`, `FOUND: Scope it to All Environments`
+- Proved the likely real cause — credentials present but the backend pinned -> `$env:DATA_BACKEND="local"` with all three variables set -> page says `FOUND: Every Supabase variable is present`, `FOUND: Change DATA_BACKEND to`
+- Proved the guard is bypassed once the backend is switched -> `DATA_BACKEND=supabase` with an unreachable host -> `curl /api/health` -> `"selected":"supabase"`, `"missing":[]`, `database.error: TypeError: fetch failed` (it is now really reaching for Supabase, not refusing)
+- Proved no secret leaks -> the page and `/api/health` were both checked for the fake key strings used in the test -> `absent` for all of them
+- Clarified `.env.example` -> it previously showed `DATA_BACKEND=local` with no warning that a deployed host must use `supabase`, which is the most likely way the wrong value got copied in
+- Regression-checked -> `npx tsc --noEmit` -> `TSC EXIT: 0`; `npx vitest run` -> `Test Files 6 passed (6)`, `Tests 43 passed (43)` (11 new diagnostics tests); `node scripts/verify.mjs` -> `ALL CHECKS PASSED` (4 new health checks); `node scripts/e2e.mjs` -> `ALL BROWSER CHECKS PASSED`
+
 ## Gates and walls
 
 - Real garment photography (plan step 2) -> not supplied -> generated labelled placeholder art, `UNVERIFIED` as real photography

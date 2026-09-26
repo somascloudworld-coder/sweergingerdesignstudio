@@ -58,6 +58,33 @@ One repository interface (`lib/db/repo.ts`), two implementations:
 The browser only ever receives `NEXT_PUBLIC_*` values. The service-role key is read
 server-side and is never sent to a client.
 
+### Deploying, and when it says "not connected to a database"
+
+A deployed host has no writable, persistent disk, so the local backend is refused there
+on purpose rather than silently losing designs and orders. Set `DATA_BACKEND=supabase`
+plus the three Supabase variables, **scoped to all environments** (a variable scoped to
+Production is not given to a Preview deployment), then **redeploy** — variables are read
+at build time.
+
+**`GET /api/health`** answers the question the setup screen can only hint at. It reports
+which backend was selected and why, each variable as present/MISSING (never a value), the
+deployment environment, and whether the database actually answered:
+
+```json
+{
+  "ok": true,
+  "backend": { "selected": "local", "reason": "DATA_BACKEND is unset and the Supabase variables are incomplete." },
+  "environment": { "runtime": "vercel", "serverless": true, "deploymentEnv": "preview" },
+  "variables": [{ "name": "SUPABASE_SERVICE_ROLE_KEY", "present": false }],
+  "missing": ["SUPABASE_SERVICE_ROLE_KEY"],
+  "database": { "reachable": true, "products": 2 }
+}
+```
+
+A `503` with `ok: false` means the studio cannot reach a database; the `database.error`
+field carries the same plain-English diagnosis the setup screen shows. It exposes no key
+material — only whether each variable is set.
+
 ## How it is put together
 
 ```

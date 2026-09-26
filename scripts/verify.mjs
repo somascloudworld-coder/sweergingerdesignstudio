@@ -81,6 +81,33 @@ check(
   `${scanned} bundles scanned; ${leaked ?? 'clean'}`,
 );
 
+console.log('\n== Deployment self-check (/api/health) ==');
+const healthResponse = await fetch(`${BASE}/api/health`);
+const healthText = await healthResponse.text();
+const health = JSON.parse(healthText);
+check(
+  'the health endpoint reports the backend it actually selected',
+  healthResponse.status === 200 && health.ok === true && health.backend?.selected === 'local',
+  `status ${healthResponse.status}, backend ${health.backend?.selected}`,
+);
+check(
+  'the health endpoint proves the database answers, not just that config exists',
+  health.database?.reachable === true && health.database?.products === 2,
+  `reachable ${health.database?.reachable}, products ${health.database?.products}`,
+);
+check(
+  'the health endpoint names each variable without printing a value',
+  Array.isArray(health.variables) &&
+    health.variables.every((v) => typeof v.present === 'boolean' && !('value' in v)),
+  health.variables?.map((v) => `${v.name}:${v.present ? 'present' : 'MISSING'}`).join(', '),
+);
+const looksLikeASecret = /sb_secret_[A-Za-z0-9]{10,}|sb_publishable_[A-Za-z0-9]{10,}|eyJ[A-Za-z0-9_-]{20,}\./;
+check(
+  'the health endpoint leaks no key material',
+  !looksLikeASecret.test(healthText),
+  `${healthText.length} bytes inspected`,
+);
+
 // ------------------------------------------------------------------ step 3
 console.log('\n== Step 3: design stored as structured layer JSON ==');
 const productId = 'prod_classic-crew-tee';
